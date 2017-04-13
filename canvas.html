@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title></title>
+<style type="text/css">
+	*{
+		margin: 0;padding: 0;
+	}
+	#parent{
+		width: 338px;
+		height: 229px;
+		position: relative;
+		background: url(a1.png) no-repeat;
+		left: 100px;
+	}
+	.c1{
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.div1{
+		width: 338px;
+		height: 229px;
+	}
+</style>
+</head>
+<body>
+	<div id="parent">
+		<canvas id="c1" width="338" height="229">
+		</canvas>
+		<div class="div1"></div>
+	</div>
+</body>
+<script type="text/javascript">
+	var oC = document.getElementById('c1');
+	var ctx = oC.getContext('2d');
+	var bOne = true;
+	var img = new Image();
+	img.onload = function(){
+		ctx.drawImage(img,0,0);
+		oC.onmousedown = function(ev){
+			var x = ev.offsetX;
+			var y = ev.offsetY;
+			console.log(x,y)
+			ctx.globalCompositeOperation = 'destination-out';
+			ctx.lineWidth = 30;
+			ctx.lineCap = 'round';
+			if(bOne){
+				ctx.moveTo(x,y);
+				bOne = false;
+			}
+			ctx.lineTo(x+10,y+10);
+			ctx.stroke();
+			oC.onmousemove = function(ev){
+				var x = ev.offsetX;
+				var y = ev.offsetY;
+				ctx.lineTo(x+10,y+10);
+				ctx.stroke();
+			};
+
+			oC.onmouseup = function(){
+				oC.onmousemove = null;
+				oC.onmouseup = null;
+
+				var getImg = ctx.getImageData(0,0,img.width,img.height);
+
+				var getW = getImg.width();
+				var getH = getImg.height();
+				console.log(getW,getH)
+				var count = 0;
+				for (var i = 0; i < getH; i++) {
+					for (var j = 0; j < getW; j++) {
+						var colors = getXY(getImg,j,i);
+						if(colors[3] == 0){
+							count++;
+						}
+					}
+				}
+				if(count>getH*getW/3){
+					oC.parentNode.removeChild(oC);
+				}
+			};
+			return false;
+		}
+	}
+	img.src = 'a3.png';
+	function getXY(img,x,y){
+		var w = img.width;
+		var h = img.height;
+		var d = img.data;
+		var colors = [];
+		colors[0] = d[(y*w+x)*4];
+		colors[1] = d[(y*w+x)*4+1];
+		colors[2] = d[(y*w+x)*4+2];
+		colors[3] = d[(y*w+x)*4+3];
+		return colors;
+	}
+	function setXY(img,x,y,colors){
+		var w = img.width;
+		var h = img.height;
+		var d = img.data;
+		d[(y*w+x)*4] = colors[0];
+		d[(y*w+x)*4+1] = colors[1];
+		d[(y*w+x)*4+2] = colors[2];
+		d[(y*w+x)*4+3] = colors[3];
+	};
+</script>
+</html>
